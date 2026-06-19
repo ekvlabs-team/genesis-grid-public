@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
 import {
@@ -40,4 +41,9 @@ test('public links only point to known project surfaces or marked coming soon', 
   assert.equal(socialLinks.telegram.href, 'https://t.me/genesisgrid_bot');
   assert.equal(socialLinks.x.href, null);
   assert.equal(socialLinks.moltbook.href, null);
+});
+
+test('prelaunch grid does not fake called awakened or ash cells', () => {
+  const css = readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8');
+  assert.equal(css.includes('.cell:nth-child'), false);
 });
