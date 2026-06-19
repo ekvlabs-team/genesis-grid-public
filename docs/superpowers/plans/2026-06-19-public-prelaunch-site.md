@@ -49,4 +49,4 @@
 - Modify: `README.md`
 
 - [x] Update README with Cloudflare build settings.
-- [ ] Commit and push to `main`.
+- [x] Commit and push to `main`.
