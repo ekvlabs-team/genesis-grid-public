@@ -14,7 +14,7 @@ function GridGlyph({ size = 28 }) {
   );
 }
 
-export function TopBar({ route, onNav, onDonate, day, walletConnected, onConnect }) {
+export function TopBar({ route, onNav, onDonate, day, submissionsOpen }) {
   const [open, setOpen] = useState(false);
   const links = [
     { key: 'home', label: 'The Grid' },
@@ -45,8 +45,8 @@ export function TopBar({ route, onNav, onDonate, day, walletConnected, onConnect
             <Button variant="secondary" size="sm" onClick={onDonate}>Donate</Button>
           </span>
           <span className="gg-wallet-desktop">
-            <Button variant={walletConnected ? 'secondary' : 'primary'} size="sm" onClick={onConnect}>
-              {walletConnected ? '0x9f3c…ae21' : 'Connect wallet'}
+            <Button variant="secondary" size="sm" disabled={!submissionsOpen} title="Wallet connection opens with the Gate.">
+              Wallet soon
             </Button>
           </span>
           <button className="gg-burger" aria-label="Menu" onClick={() => setOpen(!open)}>{open ? '×' : '≡'}</button>
@@ -60,8 +60,8 @@ export function TopBar({ route, onNav, onDonate, day, walletConnected, onConnect
         <span className="gg-day-pill">Day&nbsp;{String(day).padStart(2, '0')} / 100</span>
         <div style={{ paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
           <Button variant="secondary" size="sm" full onClick={() => { setOpen(false); onDonate(); }}>Donate / Support</Button>
-          <Button variant={walletConnected ? 'secondary' : 'primary'} size="sm" full onClick={() => { setOpen(false); onConnect(); }}>
-            {walletConnected ? 'Wallet 0x9f3c…ae21' : 'Connect wallet'}
+          <Button variant="secondary" size="sm" full disabled={!submissionsOpen} title="Wallet connection opens with the Gate.">
+            Wallet soon
           </Button>
         </div>
       </div>

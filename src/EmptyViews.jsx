@@ -43,7 +43,7 @@ export function TraceView({ data, traceId, onNav, onOpenTrace }) {
           No traces yet.
         </h2>
         <p style={{ margin: '16px 0 0', fontSize: 17, lineHeight: 1.6, color: 'var(--bone-dim)' }}>
-          Trial Cards appear here after the Oracle opens the Gate on Day 01. Each trace gets a permanent card at /trial/{'{id}'}.
+          Trial Cards appear here after the Oracle opens the Gate on Day 01. Until then, no public trace route is live.
         </p>
         <div style={{ marginTop: 24 }}>
           <Button variant="secondary" onClick={() => onNav('home')}>Back to the Grid</Button>

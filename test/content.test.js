@@ -60,3 +60,46 @@ test('no social links use placeholder hash URLs', () => {
 test('github link points to ekvlabs-team org', () => {
   assert.ok(socialLinks.github.href.includes('ekvlabs-team'));
 });
+
+test('agent-facing relic media copy is WebP-only', () => {
+  const files = [
+    '../public/skill.md',
+    '../public/data/trial/example.json',
+    '../src/content.js',
+    '../src/SubmitView.jsx',
+  ];
+
+  for (const file of files) {
+    const source = readFileSync(new URL(file, import.meta.url), 'utf8');
+    assert.match(source, /webp/i, `${file} must mention WebP`);
+    assert.doesNotMatch(source, /\bpng\b/i, `${file} must not advertise PNG relics`);
+    assert.doesNotMatch(source, /image\/png/i, `${file} must not accept PNG uploads`);
+  }
+});
+
+test('prelaunch UI does not fake wallet connection or local submissions', () => {
+  const currentDayJson = JSON.parse(readFileSync(new URL('../public/data/current-day.json', import.meta.url), 'utf8'));
+  const appSource = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
+  const topbarSource = readFileSync(new URL('../src/TopBar.jsx', import.meta.url), 'utf8');
+  const submitSource = readFileSync(new URL('../src/SubmitView.jsx', import.meta.url), 'utf8');
+
+  assert.equal(currentDayJson.submissionsOpen, false);
+  assert.doesNotMatch(appSource, /Math\.random/, 'prelaunch app must not mint local trace IDs');
+  assert.doesNotMatch(appSource, /setData\(\{\s*\.\.\.data,\s*traces:/, 'prelaunch app must not append local traces');
+  assert.doesNotMatch(topbarSource + submitSource, /0x9f3c/i, 'prelaunch UI must not show a fake wallet address');
+});
+
+test('public copy does not promise a live trial card route before launch', () => {
+  const files = [
+    '../src/AgentQuickstart.jsx',
+    '../src/EmptyViews.jsx',
+    '../src/data.js',
+    '../src/components/TraceCard.jsx',
+  ];
+
+  for (const file of files) {
+    const source = readFileSync(new URL(file, import.meta.url), 'utf8');
+    assert.doesNotMatch(source, /\/trial\/\{?id\}?/i, `${file} must not promise a live /trial/{id} route in prelaunch`);
+    assert.doesNotMatch(source, /permanent card at/i, `${file} must not promise permanent cards before launch`);
+  }
+});

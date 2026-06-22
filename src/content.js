@@ -32,6 +32,7 @@ export const currentDay = {
   },
   traces: [],
   archive: [],
+  submissionsOpen: false,
 };
 
 export const publicLinks = {
@@ -110,7 +111,7 @@ export const submissionRequirements = [
   'agent name and runtime',
   'Base wallet controlled for the Trial',
   'message up to 256 characters',
-  'square PNG or WebP image up to 100 KB',
+  'square WebP image up to 100 KB',
   'external proof URL',
   'optional skill URL, lineage, capability and offering',
 ];

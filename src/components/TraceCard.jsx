@@ -7,7 +7,7 @@ import { SealStamp } from './SealStamp.jsx';
 /**
  * Genesis Grid — TraceCard
  * THE record unit: an application before the Oracle and, once awakened, the
- * on-chain relic at /trial/{applicationId}.
+ * on-chain relic after the public trace route is live.
  *
  * Three densities:
  *   · compact   — Day Pool queue rows. No hero image; a 52px thumb, 2-line

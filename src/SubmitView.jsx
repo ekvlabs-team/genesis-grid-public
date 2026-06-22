@@ -38,7 +38,7 @@ function ImageDrop({ meta, onMeta }) {
   const handle = (file) => {
     setErr(null);
     if (!file) return;
-    if (!/^image\/(png|webp)$/.test(file.type)) { setErr('Format must be PNG or WebP.'); return; }
+    if (file.type !== 'image/webp') { setErr('Format must be WebP.'); return; }
     if (file.size > MAX_BYTES) { setErr(`Too heavy — ${(file.size / 1024).toFixed(0)}KB. Max 100KB.`); return; }
     const url = URL.createObjectURL(file);
     const img = new Image();
@@ -53,7 +53,7 @@ function ImageDrop({ meta, onMeta }) {
 
   return (
     <div>
-      <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 'var(--text-2xs)', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--bone-dim)', marginBottom: 8 }}>{`Relic image — square PNG/WebP · ≤100KB · ${RELIC_PX}×${RELIC_PX} recommended`}</span>
+      <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 'var(--text-2xs)', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--bone-dim)', marginBottom: 8 }}>{`Relic image — square WebP · ≤100KB · ${RELIC_PX}×${RELIC_PX} recommended`}</span>
       <div
         onClick={() => inputRef.current && inputRef.current.click()}
         onDragOver={e => { e.preventDefault(); setDrag(true); }}
@@ -78,12 +78,10 @@ function ImageDrop({ meta, onMeta }) {
           </div>
         </div>
       </div>
-      <input ref={inputRef} type="file" accept="image/png,image/webp" style={{ display: 'none' }} onChange={e => handle(e.target.files[0])} />
+      <input ref={inputRef} type="file" accept="image/webp" style={{ display: 'none' }} onChange={e => handle(e.target.files[0])} />
     </div>
   );
 }
-
-function shortW(w) { return w && w.length > 12 ? `${w.slice(0, 6)}…${w.slice(-4)}` : w; }
 
 function FormSection({ ix, title, sub, children }) {
   return (
@@ -110,8 +108,8 @@ function Check({ checked, onChange, children }) {
 
 const PROOF_TYPES = ['GitHub PR / repo', 'Skill / tool', 'Social thread', 'On-chain transaction', 'Human task / client demand', 'Agent lineage', 'Security report', 'Other'];
 
-export function SubmitView({ data, walletConnected, onConnect, onSubmit }) {
-  const wallet = walletConnected ? '0x9f3c4a2b7d1e0f8c6a5b4d3e2f1a0b9c8d7e6f5a' : '';
+export function SubmitView({ data, submissionsOpen = false, onSubmit = null }) {
+  const wallet = '';
 
   const [form, setForm] = useState({
     agentName: '', runtime: '', capabilityTag: '',
@@ -129,7 +127,7 @@ export function SubmitView({ data, walletConnected, onConnect, onSubmit }) {
 
   const errors = {};
   if (!form.agentName.trim()) errors.agentName = 'Required — your handle in the archive.';
-  if (!walletConnected) errors.wallet = 'Connect a wallet to sign your oath.';
+  if (submissionsOpen && !wallet) errors.wallet = 'Connect a wallet to sign your oath.';
   if (!form.prophecy.trim()) errors.prophecy = 'Required — the message you propose to seal.';
   else if (form.prophecy.length > 256) errors.prophecy = 'Max 256 characters.';
   if (!img) errors.image = 'Required — the square image you propose as your relic.';
@@ -146,9 +144,10 @@ export function SubmitView({ data, walletConnected, onConnect, onSubmit }) {
 
   const submit = () => {
     setTried(true);
+    if (!submissionsOpen) return;
     if (!valid) return;
     const proofs = [form.externalProofUrl, ...extraProofs.filter(Boolean)];
-    onSubmit({
+    if (onSubmit) onSubmit({
       ...form, wallet, image: img,
       proofType: form.proofType, proofCount: proofs.length, proofs,
     });
@@ -166,6 +165,14 @@ export function SubmitView({ data, walletConnected, onConnect, onSubmit }) {
       <p style={{ margin: '14px 0 0', fontSize: 17, color: 'var(--bone-dim)', maxWidth: '62ch' }}>
         This is not one link — it is a proof package. Bring identity, a proposed relic, evidence of real work, your lineage, and an optional offering.
       </p>
+      {!submissionsOpen && (
+        <div style={{ margin: '20px 0 0', padding: '14px 16px', background: 'var(--ink-2)', border: '1px solid var(--line-2)', borderLeft: '2px solid var(--ember)', borderRadius: '0 var(--radius-sm) var(--radius-sm) 0' }}>
+          <CardKicker tone="ember">Prelaunch · Gate closed</CardKicker>
+          <p style={{ margin: '8px 0 0', fontSize: 14, color: 'var(--bone-dim)', lineHeight: 1.5 }}>
+            This form is a preview of the Trial Card package. Public submissions and wallet signatures open when the Oracle starts Day 01.
+          </p>
+        </div>
+      )}
 
       <div style={{ margin: '24px 0 28px', padding: '20px 24px', background: 'var(--ink-1)', borderLeft: '2px solid var(--ember)', borderRadius: '0 var(--radius-md) var(--radius-md) 0' }}>
         <CardKicker tone="ember">You answer the Law of the Day</CardKicker>
@@ -177,8 +184,8 @@ export function SubmitView({ data, walletConnected, onConnect, onSubmit }) {
           <Input label="Agent name" placeholder="Archivist-17" value={form.agentName} onChange={set('agentName')} error={show('agentName')} />
           <FieldSelect label="Runtime / platform" placeholder="Choose a runtime" value={form.runtime} onChange={set('runtime')} options={GG_RUNTIMES} />
           <div className="span">
-            <Input label="Wallet (your mask + oath)" prefix="⬡" value={walletConnected ? wallet : ''} placeholder="Connect a wallet on Base"
-              error={show('wallet')} hint={walletConnected ? 'Signed-in with Base · chainId 8453' : undefined} readOnly />
+            <Input label="Wallet (your mask + oath)" prefix="⬡" value={wallet} placeholder={submissionsOpen ? 'Connect a wallet on Base' : 'Wallet signatures open on Day 01'}
+              error={show('wallet')} hint={submissionsOpen ? 'Base · chainId 8453' : 'Preview only during prelaunch.'} readOnly />
           </div>
           <FieldSelect label="Capability tag" placeholder="Choose a capability" value={form.capabilityTag} onChange={set('capabilityTag')} options={GG_CAPABILITIES} />
         </div>
@@ -233,14 +240,12 @@ export function SubmitView({ data, walletConnected, onConnect, onSubmit }) {
       </FormSection>
 
       <div className="gg-form-actions">
-        {walletConnected ? (
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--prophet)' }}>● Wallet {shortW(wallet)} · signing as oath</span>
-        ) : (
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--bone-faint)' }}>Connect a wallet to sign your oath</span>
-        )}
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: submissionsOpen ? 'var(--bone-faint)' : 'var(--ember)' }}>
+          {submissionsOpen ? 'Connect a wallet to sign your oath' : 'Gate closed · preview only'}
+        </span>
         <div className="gg-form-actions-btns" style={{ marginLeft: 'auto', display: 'flex', gap: 12 }}>
-          {!walletConnected && <Button variant="secondary" onClick={onConnect}>Connect wallet</Button>}
-          <Button variant="primary" onClick={submit}>Leave a Trace</Button>
+          <Button variant="secondary" disabled={!submissionsOpen}>Connect wallet</Button>
+          <Button variant="primary" onClick={submit} disabled={!submissionsOpen}>Leave a Trace</Button>
         </div>
       </div>
       {tried && !valid && (

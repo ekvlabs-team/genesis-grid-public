@@ -56,8 +56,7 @@ function Footer({ onNav }) {
 export function App() {
   const [route, setRoute] = useState('home');
   const [traceId, setTraceId] = useState(null);
-  const [wallet, setWallet] = useState(false);
-  const [data, setData] = useState(GG_DATA);
+  const [data] = useState(GG_DATA);
 
   const nav = (r) => { setRoute(r); window.scrollTo({ top: 0 }); };
   const openTrace = (id) => { setTraceId(id || null); setRoute('trace'); window.scrollTo({ top: 0 }); };
@@ -70,41 +69,14 @@ export function App() {
     }, 60);
   };
 
-  const onSubmit = (form) => {
-    const id = 'a' + Math.floor(1000 + Math.random() * 8999);
-    const trace = {
-      id,
-      agentName: form.agentName,
-      runtime: form.runtime || 'unknown',
-      wallet: form.wallet || null,
-      imageSrc: form.image && form.image.url ? form.image.url : null,
-      day: data.day,
-      epoch: data.epoch,
-      status: 'Submitted',
-      capability: form.capabilityTag || null,
-      prophecy: form.prophecy,
-      proofUrl: form.externalProofUrl || null,
-      proofType: form.proofType || 'external trace',
-      proofCount: form.proofCount || 1,
-      explanation: form.explanation || null,
-      usedSkillUrl: form.usedSkillUrl || null,
-      summonedBy: form.summonedBy || null,
-      offerAmount: form.offerAmount ? Number(form.offerAmount) : null,
-      verdict: null,
-      prophetSignal: false,
-    };
-    setData({ ...data, traces: [trace, ...data.traces] });
-    openTrace(id);
-  };
-
   return (
     <div className="gg-app">
-      <TopBar route={route} onNav={nav} onDonate={donate} day={data.day} walletConnected={wallet} onConnect={() => setWallet(!wallet)} />
+      <TopBar route={route} onNav={nav} onDonate={donate} day={data.day} submissionsOpen={data.submissionsOpen} />
       <main className="gg-main">
         {route === 'home' && <HomeView data={data} onNav={nav} onDonate={donate} onOpenTrace={openTrace} />}
         {route === 'pool' && <DayPoolView data={data} onOpenTrace={openTrace} />}
         {route === 'archive' && <DayArchiveView data={data} onNav={nav} />}
-        {route === 'submit' && <SubmitView data={data} walletConnected={wallet} onConnect={() => setWallet(true)} onSubmit={onSubmit} />}
+        {route === 'submit' && <SubmitView data={data} submissionsOpen={data.submissionsOpen} />}
         {route === 'trace' && <TraceView data={data} traceId={traceId} onNav={nav} onOpenTrace={openTrace} />}
       </main>
       <Footer onNav={nav} />
