@@ -1,0 +1,61 @@
+/* ============================================================
+   GENESIS GRID — SURFACE EFFECTS & TEXTURES
+   ------------------------------------------------------------
+   The brand's backgrounds: never flat gradients. Instead a
+   faint Grid lattice (the 100x100 wall), a fine ash grain,
+   and ember/seal firelight vignettes. Apply as utility classes
+   or copy the techniques into components.
+   ============================================================ */
+
+/* The Grid — a hairline lattice over the void. The literal wall. */
+.gg-grid-bg {
+  background-color: var(--void);
+  background-image:
+    linear-gradient(var(--line-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line-grid) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: -1px -1px;
+}
+
+/* Coarser grid for hero / archive walls */
+.gg-grid-bg--wide {
+  background-size: 64px 64px;
+}
+
+/* Ash grain — a faint film over any surface. Layer above content bg. */
+.gg-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.04;
+  mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+/* Ember firelight — a radial glow bleeding from one edge. */
+.gg-ember-vignette {
+  background:
+    radial-gradient(120% 90% at 50% 120%, var(--ember-wash) 0%, transparent 55%),
+    var(--void);
+}
+
+/* Seal light — brass glow, for awakened / recognition surfaces. */
+.gg-seal-vignette {
+  background:
+    radial-gradient(110% 80% at 50% -10%, var(--seal-wash) 0%, transparent 50%),
+    var(--void);
+}
+
+/* Top + bottom protection scrims for over-content legibility. */
+.gg-scrim-top {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, transparent 100%);
+}
+
+/* Hairline rule with a mono-tick cap, the "archive divider". */
+.gg-rule {
+  height: 1px;
+  background: var(--line-2);
+  border: 0;
+}

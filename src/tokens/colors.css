@@ -1,0 +1,116 @@
+/* ============================================================
+   GENESIS GRID — COLOR
+   ------------------------------------------------------------
+   A warm ink-black void lit by ember and stamped in brass.
+   Not cyberpunk. Not purple web3. An infernal court rendered
+   as a terminal: parchment text on burnt ground.
+
+   Lore mapping:
+     ember   = the Demon, the fire, the Mark, danger, action
+     seal     = brass recognition, the Awakened, the NFT Seal
+     prophet  = oxidized verdigris, Prophet Signal, cold light
+     ash      = cold dead gray, the burned trace
+     bone     = parchment, scripture, the written word
+   ============================================================ */
+
+:root {
+  /* ---- Base ground: warm near-black ramp ---- */
+  --void:        #0A0908;   /* page background — the abyss */
+  --ink-1:       #110F0D;   /* card / panel surface */
+  --ink-2:       #181512;   /* raised: inputs, wells */
+  --ink-3:       #221D19;   /* hover / active surface */
+  --ink-4:       #2C2620;   /* pressed / selected surface */
+
+  /* ---- Hairlines & borders (warm) ---- */
+  --line-1:      #241F1B;   /* faint divider */
+  --line-2:      #342E27;   /* default border */
+  --line-3:      #4A4137;   /* strong border / rule */
+  --line-grid:   #1B1714;   /* the Grid lattice lines */
+
+  /* ---- Bone / parchment text ---- */
+  --bone:        #ECE6D9;   /* primary text */
+  --bone-dim:    #B5AB99;   /* secondary text */
+  --bone-faint:  #7E7464;   /* muted / placeholder */
+  --bone-ghost:  #574F45;   /* disabled / faint chrome */
+
+  /* ---- Ember: fire / demon / mark / primary action ---- */
+  --ember:        #D9542B;
+  --ember-bright: #F26B3F;  /* hover lift */
+  --ember-deep:   #8E2A14;  /* pressed / deep oxblood */
+  --ember-ink:    #2A1009;  /* ember on dark fill base */
+  --ember-glow:   rgba(217, 84, 43, 0.45);
+  --ember-wash:   rgba(217, 84, 43, 0.12);
+
+  /* ---- Seal: brass gold / awakened / recognition ---- */
+  --seal:         #C9A24B;
+  --seal-bright:  #E2BD64;
+  --seal-deep:    #6E5418;
+  --seal-ink:     #211904;
+  --seal-glow:    rgba(201, 162, 75, 0.42);
+  --seal-wash:    rgba(201, 162, 75, 0.11);
+
+  /* ---- Prophet: oxidized verdigris / signal / cold light ---- */
+  --prophet:      #5E9C8B;
+  --prophet-bright:#79B6A4;
+  --prophet-deep: #284A41;
+  --prophet-wash: rgba(94, 156, 139, 0.12);
+
+  /* ---- Ash: cold dead gray / the burned trace ---- */
+  --ash:          #8C8478;
+  --ash-deep:     #463F38;
+  --ash-wash:     rgba(140, 132, 120, 0.10);
+
+  /* ============================================================
+     SEMANTIC ALIASES
+     ============================================================ */
+
+  /* Surfaces */
+  --bg-void:          var(--void);
+  --surface-card:     var(--ink-1);
+  --surface-raised:   var(--ink-2);
+  --surface-hover:    var(--ink-3);
+  --surface-active:   var(--ink-4);
+  --surface-overlay:  rgba(10, 9, 8, 0.78);
+
+  /* Text */
+  --text-primary:     var(--bone);
+  --text-secondary:   var(--bone-dim);
+  --text-muted:       var(--bone-faint);
+  --text-disabled:    var(--bone-ghost);
+  --text-on-ember:    var(--void);
+  --text-on-seal:     var(--seal-ink);
+
+  /* Borders */
+  --border-hairline:  var(--line-1);
+  --border-default:   var(--line-2);
+  --border-strong:    var(--line-3);
+
+  /* Accent (the fire) */
+  --accent:           var(--ember);
+  --accent-hover:     var(--ember-bright);
+  --accent-press:     var(--ember-deep);
+  --on-accent:        var(--void);
+  --focus-ring:       var(--ember);
+
+  /* ============================================================
+     STATUS — the five trial states (read in one second)
+       Summoned  · seen, not judged   → neutral bone/steel
+       Marked    · branded by the Demon → ember
+       Awakened  · the Seal granted     → brass gold
+       Ash       · the trace did not survive → cold ash
+       Hidden    · gated / removed      → ghost
+     ============================================================ */
+  --status-summoned:   var(--bone-dim);
+  --status-summoned-wash: rgba(181, 171, 153, 0.10);
+  --status-marked:     var(--ember);
+  --status-marked-wash: var(--ember-wash);
+  --status-awakened:   var(--seal);
+  --status-awakened-wash: var(--seal-wash);
+  --status-ash:        var(--ash);
+  --status-ash-wash:   var(--ash-wash);
+  --status-hidden:     var(--bone-ghost);
+
+  /* Signal / Noise (Prophet attention layer) */
+  --signal:           var(--prophet);
+  --noise:            var(--ash);
+}

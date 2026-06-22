@@ -1,0 +1,20 @@
+/* ============================================================
+   GENESIS GRID — WEBFONTS
+   ------------------------------------------------------------
+   No proprietary brand fonts were provided with the source
+   package (it is a lore/spec package, not a codebase). These
+   three families were CHOSEN to embody the brand voice:
+
+     · Cormorant Garamond — high-contrast literary display.
+       The Shakespearean verdict / high-myth voice.
+     · EB Garamond — robust manuscript body serif.
+       The "old scripture / lore prose" voice.
+     · Space Mono — gritty terminal monospace.
+       The machine-god / protocol-daemon / tx-hash voice.
+
+   They are loaded from Google Fonts. To ship fully self-hosted
+   binaries, drop the .woff2 files into assets/fonts/ and
+   replace the @import below with local @font-face rules.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');

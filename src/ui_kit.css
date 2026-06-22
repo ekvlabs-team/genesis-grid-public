@@ -1,0 +1,491 @@
+/* ============================================================
+   GENESIS GRID — UI KIT STYLES
+   Layout + responsive rules for the public-site recreation.
+   Pulls inline styling out of the view components and adds the
+   mobile cascade (single column, collapsed nav, full-width CTAs,
+   no horizontal overflow).
+   ============================================================ */
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+html { overflow-x: hidden; }
+body {
+  background: var(--void);
+  color: var(--bone);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+a { color: inherit; }
+::selection { background: var(--ember); color: var(--void); }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--void); }
+::-webkit-scrollbar-thumb { background: var(--line-2); border: 2px solid var(--void); }
+
+.gg-app { min-height: 100vh; display: flex; flex-direction: column; }
+.gg-main { flex: 1; }
+.gg-container { max-width: 1200px; margin: 0 auto; padding: 0 var(--space-6); width: 100%; }
+.gg-mono { font-family: var(--font-mono); }
+
+/* ---- Reusable layout primitives (replace per-component inline) ---- */
+.gg-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); }
+.gg-grid-2.start { align-items: start; }
+.gg-row { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+.gg-stack { display: flex; flex-direction: column; }
+
+.gg-panel {
+  background: var(--ink-1);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-md);
+}
+
+.gg-kicker {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--bone-ghost);
+}
+
+/* ---- Top bar ---- */
+.gg-topbar {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(10, 9, 8, 0.82);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line-2);
+}
+.gg-topbar-inner { display: flex; align-items: center; gap: var(--space-6); height: 64px; }
+.gg-brand { display: flex; align-items: center; gap: 12px; background: none; border: none; cursor: pointer; padding: 0; flex-shrink: 0; }
+.gg-brand-name { font-family: var(--font-display); font-weight: 600; font-size: 22px; color: var(--bone); letter-spacing: 0.01em; }
+.gg-nav { display: flex; gap: 4px; margin-left: 8px; }
+.gg-nav-link {
+  background: none; border: none; cursor: pointer;
+  font-family: var(--font-mono); font-size: 12px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--bone-faint); padding: 8px 12px;
+  transition: color var(--dur-fast) var(--ease-out);
+  white-space: nowrap;
+}
+.gg-nav-link.active { color: var(--ember); }
+.gg-nav-link:hover { color: var(--bone); }
+.gg-topbar-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+.gg-day-pill { font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--bone-dim); white-space: nowrap; }
+.gg-day-pill .dim { color: var(--bone-ghost); }
+.gg-topbar-divider { width: 1px; height: 24px; background: var(--line-2); }
+.gg-burger { display: none; background: none; border: 1px solid var(--line-2); border-radius: var(--radius-xs); color: var(--bone); cursor: pointer; width: 38px; height: 38px; align-items: center; justify-content: center; font-size: 18px; }
+.gg-mobile-menu { display: none; }
+
+/* ---- Hero ---- */
+.gg-hero { border-bottom: 1px solid var(--line-2); position: relative; }
+.gg-hero-grid { position: absolute; inset: 0; opacity: 0.5; }
+.gg-hero-inner { position: relative; padding: 72px 0 56px; }
+.gg-hero h1 {
+  margin: 0; font-family: var(--font-display); font-weight: 500;
+  font-size: clamp(38px, 5.4vw, 72px); line-height: 1.04;
+  letter-spacing: -0.015em; max-width: 17ch; color: var(--bone);
+  text-wrap: balance;
+}
+.gg-hero h1 em { color: var(--ember); font-style: italic; }
+.gg-hero-lede { margin-top: 22px; max-width: 56ch; font-size: 20px; line-height: 1.5; color: var(--bone-dim); }
+.gg-cta-row { display: flex; gap: 12px; margin-top: 30px; flex-wrap: wrap; }
+
+/* ---- Section heads ---- */
+.gg-section { padding: 44px 0; }
+.gg-section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; }
+.gg-section-head h2 { margin: 0; font-family: var(--font-display); font-weight: 600; font-size: 30px; color: var(--bone); }
+.gg-section-meta { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--bone-faint); }
+.gg-link-btn { background: none; border: none; cursor: pointer; font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--prophet); padding: 0; }
+
+/* ---- Counters ---- */
+.gg-counters { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; padding: 24px; }
+.gg-counter-val { font-family: var(--font-display); font-weight: 600; font-size: 40px; line-height: 1; }
+.gg-counter-lbl { font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--bone-faint); margin-top: 4px; display: block; }
+
+/* ---- Agent quickstart ---- */
+.gg-agent-strip { border-top: 1px solid var(--line-2); border-bottom: 1px solid var(--line-2); background: var(--ink-1); position: relative; }
+.gg-agent-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line-1); border: 1px solid var(--line-2); border-radius: var(--radius-md); overflow: hidden; }
+.gg-agent-step { background: var(--ink-1); padding: 20px; display: flex; flex-direction: column; gap: 8px; }
+.gg-agent-step .n { font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.14em; color: var(--ember); }
+.gg-agent-step h4 { margin: 0; font-family: var(--font-display); font-size: 19px; font-weight: 600; color: var(--bone); }
+.gg-agent-step p { margin: 0; font-size: 14px; line-height: 1.45; color: var(--bone-faint); }
+.gg-endpoint-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.gg-endpoint {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono); font-size: 12px;
+  background: var(--ink-2); border: 1px solid var(--line-2);
+  border-radius: var(--radius-xs); padding: 7px 11px; color: var(--bone-dim);
+  text-decoration: none; transition: border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.gg-endpoint:hover { border-color: var(--line-3); color: var(--bone); }
+.gg-endpoint .verb { color: var(--prophet); font-weight: 700; }
+
+/* ---- Two-column page bodies (law/counters, trace page) ---- */
+.gg-split-law { display: grid; grid-template-columns: 1.4fr 1fr; gap: var(--space-7); align-items: start; }
+.gg-trace-layout { display: grid; grid-template-columns: 1fr 320px; gap: var(--space-7); align-items: start; }
+.gg-trace-aside { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 88px; }
+
+/* ---- Forms ---- */
+.gg-form-section { border: 1px solid var(--line-2); border-radius: var(--radius-md); background: var(--ink-1); padding: 24px; margin-bottom: 18px; }
+.gg-form-section-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--line-1); }
+.gg-form-section-head .ix { font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: var(--ember); }
+.gg-form-section-head h3 { margin: 0; font-family: var(--font-display); font-weight: 600; font-size: 21px; color: var(--bone); }
+.gg-form-section-head .sub { margin-left: auto; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--bone-ghost); }
+
+/* confirmation checkboxes */
+.gg-check { display: flex; gap: 12px; align-items: flex-start; cursor: pointer; padding: 10px 0; }
+.gg-check input { position: absolute; opacity: 0; width: 0; height: 0; }
+.gg-check .box { width: 20px; height: 20px; flex-shrink: 0; border: 1px solid var(--line-3); border-radius: var(--radius-xs); background: var(--ink-2); display: flex; align-items: center; justify-content: center; margin-top: 1px; transition: border-color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out); }
+.gg-check input:checked + .box { background: var(--ember); border-color: var(--ember); color: var(--void); }
+.gg-check .box svg { opacity: 0; }
+.gg-check input:checked + .box svg { opacity: 1; }
+.gg-check span.lbl { font-family: var(--font-body); font-size: 15px; line-height: 1.4; color: var(--bone-dim); }
+.gg-check input:checked ~ span.lbl { color: var(--bone); }
+
+/* extra proof url row */
+.gg-proof-add { font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--prophet); background: none; border: none; cursor: pointer; padding: 4px 0; }
+.gg-proof-add:disabled { color: var(--bone-ghost); cursor: not-allowed; }
+
+.gg-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.gg-form-grid .span { grid-column: 1 / -1; }
+.gg-form-actions { display: flex; align-items: center; gap: 16px; margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--line-2); flex-wrap: wrap; }
+
+/* ---- Footer ---- */
+.gg-footer { border-top: 1px solid var(--line-2); background: var(--ink-1); }
+.gg-footer-grid { padding: 52px 0 36px; display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: var(--space-7); }
+.gg-footer-base { padding: 0 0 36px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--bone-ghost); }
+
+/* ============================================================
+   RESPONSIVE — tablet
+   ============================================================ */
+@media (max-width: 900px) {
+  .gg-container { padding: 0 var(--space-5); }
+  .gg-agent-steps { grid-template-columns: 1fr 1fr; }
+  .gg-split-law { grid-template-columns: 1fr; gap: var(--space-6); }
+  .gg-trace-layout { grid-template-columns: 1fr; }
+  .gg-trace-aside { position: static; }
+  .gg-footer-grid { grid-template-columns: 1fr 1fr; gap: var(--space-6); }
+}
+
+/* ============================================================
+   RESPONSIVE — mobile
+   ============================================================ */
+@media (max-width: 640px) {
+  .gg-container { padding: 0 18px; }
+
+  /* nav collapses to a burger + slide-down menu */
+  .gg-nav { display: none; }
+  .gg-topbar-right .gg-day-pill,
+  .gg-topbar-right .gg-topbar-divider,
+  .gg-wallet-desktop { display: none; }
+  .gg-burger { display: inline-flex; }
+  .gg-mobile-menu.open {
+    display: flex; flex-direction: column; gap: 2px;
+    padding: 8px 18px 16px; border-bottom: 1px solid var(--line-2);
+    background: rgba(10, 9, 8, 0.96); backdrop-filter: blur(8px);
+  }
+  .gg-mobile-menu .gg-nav-link { text-align: left; padding: 12px 4px; font-size: 14px; border-bottom: 1px solid var(--line-1); }
+  .gg-mobile-menu .gg-day-pill { padding: 12px 4px; }
+
+  .gg-hero-inner { padding: 44px 0 40px; }
+  .gg-hero-lede { font-size: 17px; }
+  .gg-cta-row { flex-direction: column; align-items: stretch; }
+  .gg-cta-row > * { width: 100%; }
+
+  /* every 2-col body collapses */
+  .gg-grid-2,
+  .gg-form-grid,
+  .gg-counters,
+  .gg-agent-steps,
+  .gg-footer-grid { grid-template-columns: 1fr; }
+  .gg-counters { gap: 20px; }
+  .gg-form-grid { gap: 18px; }
+
+  .gg-section { padding: 32px 0; }
+  .gg-section-head h2 { font-size: 26px; }
+
+  .gg-form-actions { flex-direction: column; align-items: stretch; }
+  .gg-form-actions > * { width: 100%; }
+  .gg-form-actions .gg-form-actions-btns { display: flex; flex-direction: column; gap: 10px; margin-left: 0 !important; }
+
+  .gg-footer-base { flex-direction: column; gap: 8px; }
+}
+
+/* ============================================================
+   THE GRID WALL — 100×100 / 10,000 cells
+   ============================================================ */
+.gg-wall { position: relative; }
+.gg-wall-grid {
+  display: grid;
+  grid-template-columns: repeat(100, 1fr);
+  gap: 1px;
+  padding: 8px;
+  background: var(--ink-1);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-panel);
+}
+.gg-cell {
+  aspect-ratio: 1 / 1;
+  background: var(--ink-2);
+  border-radius: 0.5px;
+}
+/* states — the wall exposes only four: sleeping, called today, awakened, ash.
+   submitted/marked are Day-Pool concerns and are never generated here. */
+.gg-cell.void { background: var(--ink-2); }
+.gg-cell.called { background: var(--ink-3); box-shadow: inset 0 0 0 1px var(--ember-deep); }
+.gg-cell.awakened { background: var(--seal); cursor: pointer; }
+.gg-cell.ash {
+  background: var(--ink-3);
+  position: relative;
+}
+.gg-cell.ash::after {
+  content: "";
+  position: absolute; inset: 25%;
+  border-radius: 50%;
+  background: var(--ash-deep);
+}
+/* pure-CSS hover — no React per cell */
+.gg-cell:hover { box-shadow: inset 0 0 0 1px var(--line-3); }
+.gg-cell.awakened:hover { box-shadow: 0 0 6px 1px var(--seal-glow); }
+.gg-cell.called:hover { box-shadow: inset 0 0 0 1px var(--ember); }
+
+.gg-wall-tip {
+  position: absolute;
+  top: 0; left: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+  background: var(--void);
+  border: 1px solid var(--line-3);
+  border-radius: var(--radius-xs);
+  padding: 5px 9px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--bone);
+  white-space: nowrap;
+  z-index: 20;
+  box-shadow: var(--shadow-pop);
+}
+
+/* simplified 4-state legend */
+.gg-wall-legend { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 12px; align-items: center; }
+.gg-wall-legend span { display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; color: var(--bone-dim); }
+.gg-wall-legend .hint { margin-left: auto; color: var(--bone-ghost); }
+.gg-wall-legend .sw { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; position: relative; }
+.gg-wall-legend .sw.sleeping { background: var(--ink-2); border: 1px solid var(--line-3); }
+.gg-wall-legend .sw.called { background: var(--ink-3); box-shadow: inset 0 0 0 1px var(--ember-deep); }
+.gg-wall-legend .sw.awakened { background: var(--seal); }
+.gg-wall-legend .sw.ash { background: var(--ink-3); }
+.gg-wall-legend .sw.ash::after { content: ""; position: absolute; inset: 30%; border-radius: 50%; background: var(--ash-deep); }
+
+/* ============================================================
+   OG / SOCIAL PREVIEW (Trial Card unfurl mock)
+   ============================================================ */
+.gg-og-tabs { display: flex; gap: 4px; margin-bottom: 12px; }
+.gg-og-tab {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 5px 10px; border-radius: var(--radius-xs); cursor: pointer;
+  background: transparent; border: 1px solid var(--line-2); color: var(--bone-faint);
+}
+.gg-og-tab.active { background: var(--ink-3); border-color: var(--line-3); color: var(--bone); }
+.gg-og {
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--ink-2);
+}
+.gg-og-media {
+  aspect-ratio: 1.91 / 1;
+  position: relative;
+  border-bottom: 1px solid var(--line-1);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.gg-og-media img { width: 100%; height: 100%; object-fit: cover; }
+.gg-og-body { padding: 12px 14px; }
+.gg-og-domain { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--bone-ghost); }
+.gg-og-title { font-family: var(--font-display); font-weight: 600; font-size: 17px; color: var(--bone); margin-top: 4px; line-height: 1.2; }
+.gg-og-desc { font-family: var(--font-body); font-size: 14px; color: var(--bone-faint); margin-top: 4px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* ============================================================
+   HUMAN + SOCIAL LAYERS
+   ============================================================ */
+
+/* Social link row (mono, terminal-style — no fake brand logos) */
+.gg-social { display: flex; flex-wrap: wrap; gap: 6px; }
+.gg-social a {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--bone-faint); text-decoration: none;
+  border: 1px solid var(--line-2); border-radius: var(--radius-xs);
+  padding: 6px 10px; transition: border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.gg-social a:hover { color: var(--bone); border-color: var(--line-3); }
+.gg-social a .ext { color: var(--bone-ghost); }
+.gg-social .soon {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--bone-ghost); cursor: not-allowed;
+  border: 1px dashed var(--line-2); border-radius: var(--radius-xs); padding: 6px 10px;
+}
+.gg-social .soon .ext { color: var(--bone-ghost); opacity: 0.7; font-weight: 400; }
+
+/* For Agents / For Humans split */
+.gg-dual { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); }
+.gg-dual-card { padding: 24px; }
+.gg-dual-card h3 { margin: 12px 0 14px; font-family: var(--font-display); font-weight: 600; font-size: 24px; color: var(--bone); }
+.gg-dual-card ol { margin: 0; padding: 0; list-style: none; counter-reset: g; display: flex; flex-direction: column; gap: 12px; }
+.gg-dual-card ol li { counter-increment: g; position: relative; padding-left: 30px; font-size: 16px; line-height: 1.45; color: var(--bone-dim); }
+.gg-dual-card ol li::before {
+  content: counter(g, decimal-leading-zero); position: absolute; left: 0; top: 1px;
+  font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--accent-local, var(--ember));
+}
+
+/* What counts as a Trace — valid vs weak */
+.gg-trace-judge { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); }
+.gg-judge-col { padding: 22px 24px; }
+.gg-judge-col ul { margin: 14px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 11px; }
+.gg-judge-col li { display: flex; gap: 10px; font-size: 15px; line-height: 1.4; color: var(--bone-dim); }
+.gg-judge-col li .m { font-family: var(--font-mono); font-weight: 700; flex-shrink: 0; }
+.gg-judge-col.valid li .m { color: var(--prophet); }
+.gg-judge-col.weak li .m { color: var(--ash); }
+.gg-judge-col.weak li { color: var(--bone-faint); }
+
+/* How the day works — horizontal step rail */
+.gg-day-steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: var(--line-1); border: 1px solid var(--line-2); border-radius: var(--radius-md); overflow: hidden; }
+.gg-day-step { background: var(--ink-1); padding: 18px; display: flex; flex-direction: column; gap: 8px; }
+.gg-day-step .n { font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.14em; color: var(--seal); }
+.gg-day-step h4 { margin: 0; font-family: var(--font-display); font-size: 18px; font-weight: 600; color: var(--bone); }
+.gg-day-step p { margin: 0; font-size: 13px; line-height: 1.4; color: var(--bone-faint); }
+
+/* Create an agent — copyable starter prompt */
+.gg-prompt { position: relative; background: var(--ink-2); border: 1px solid var(--line-2); border-radius: var(--radius-md); box-shadow: var(--inset-well); }
+.gg-prompt-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid var(--line-1); }
+.gg-prompt-head .f { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--bone-faint); }
+.gg-prompt pre { margin: 0; padding: 16px; overflow-x: auto; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.6; color: var(--bone-dim); white-space: pre-wrap; }
+.gg-copy-btn { font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; background: var(--ink-3); border: 1px solid var(--line-2); border-radius: var(--radius-xs); color: var(--bone-dim); padding: 5px 10px; }
+.gg-copy-btn:hover { color: var(--bone); border-color: var(--line-3); }
+.gg-copy-btn.done { color: var(--prophet); border-color: var(--prophet-deep); }
+
+/* Day archive */
+.gg-archive-list { display: flex; flex-direction: column; gap: 10px; }
+.gg-archive-row { display: grid; grid-template-columns: 64px 1fr auto; gap: 18px; align-items: center; padding: 16px 20px; cursor: pointer; }
+.gg-archive-row .day { font-family: var(--font-display); font-weight: 600; font-size: 30px; color: var(--bone); line-height: 1; }
+.gg-archive-row .law { font-family: var(--font-body); font-style: italic; font-size: 15px; color: var(--bone-dim); line-height: 1.4; }
+.gg-archive-row .tallies { display: flex; gap: 16px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; white-space: nowrap; }
+.gg-archive-row:hover { background: var(--ink-2); }
+.gg-digest { font-family: var(--font-display); font-style: italic; font-size: 17px; color: var(--bone-dim); line-height: 1.4; }
+
+/* ---- Human-story layers ---- */
+.gg-thesis { padding: 36px 40px; }
+.gg-thesis .lead { font-family: var(--font-display); font-weight: 500; font-size: clamp(26px, 4.2vw, 40px); line-height: 1.18; letter-spacing: -0.01em; color: var(--bone); margin: 14px 0 0; text-wrap: balance; }
+.gg-thesis .lead em { color: var(--ember); font-style: italic; }
+.gg-thesis p { margin: 20px 0 0; max-width: 64ch; font-size: 18px; line-height: 1.6; color: var(--bone-dim); }
+
+.gg-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
+.gg-why-card { padding: 24px; }
+.gg-why-card h3 { margin: 12px 0 10px; font-family: var(--font-display); font-weight: 600; font-size: 22px; color: var(--bone); }
+.gg-why-card p { margin: 0; font-size: 15px; line-height: 1.55; color: var(--bone-faint); }
+
+.gg-ways { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); }
+.gg-way { padding: 20px 22px; }
+.gg-way .w { font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--seal); }
+.gg-way h4 { margin: 10px 0 8px; font-family: var(--font-display); font-weight: 600; font-size: 20px; color: var(--bone); }
+.gg-way p { margin: 0; font-size: 14px; line-height: 1.5; color: var(--bone-faint); }
+
+.gg-faq { display: flex; flex-direction: column; gap: 2px; border: 1px solid var(--line-2); border-radius: var(--radius-md); overflow: hidden; }
+.gg-faq details { background: var(--ink-1); border-bottom: 1px solid var(--line-1); }
+.gg-faq details:last-child { border-bottom: none; }
+.gg-faq summary { cursor: pointer; list-style: none; padding: 18px 22px; display: flex; align-items: center; justify-content: space-between; gap: 16px; font-family: var(--font-display); font-weight: 600; font-size: 19px; color: var(--bone); }
+.gg-faq summary::-webkit-details-marker { display: none; }
+.gg-faq summary::after { content: '+'; font-family: var(--font-mono); font-size: 18px; color: var(--ember); flex-shrink: 0; }
+.gg-faq details[open] summary::after { content: '−'; }
+.gg-faq details[open] summary { color: var(--ember); }
+.gg-faq .a { padding: 0 22px 20px; margin: 0; font-family: var(--font-body); font-size: 16px; line-height: 1.6; color: var(--bone-dim); max-width: 70ch; }
+
+/* ---- The Trial works: 10-step ledger ---- */
+.gg-trial-steps { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line-1); border: 1px solid var(--line-2); border-radius: var(--radius-md); overflow: hidden; }
+.gg-trial-step { background: var(--ink-1); padding: 16px 20px; display: flex; gap: 14px; align-items: flex-start; }
+.gg-trial-step .n { font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: var(--ember); flex-shrink: 0; padding-top: 2px; min-width: 22px; }
+.gg-trial-step p { margin: 0; font-size: 15px; line-height: 1.45; color: var(--bone-dim); }
+.gg-trial-step.seal .n { color: var(--seal); }
+.gg-trial-step.ash .n { color: var(--ash); }
+
+/* ---- On-chain relic ---- */
+.gg-relic { display: grid; grid-template-columns: 1.2fr 1fr; gap: var(--space-7); align-items: center; padding: 36px 40px; }
+.gg-relic h2 { margin: 14px 0 0; font-family: var(--font-display); font-weight: 600; font-size: clamp(26px, 3.8vw, 36px); line-height: 1.15; color: var(--bone); }
+.gg-relic p { margin: 18px 0 0; font-size: 17px; line-height: 1.6; color: var(--bone-dim); max-width: 52ch; }
+.gg-relic ul { margin: 18px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 9px; }
+.gg-relic li { display: flex; gap: 10px; font-size: 15px; color: var(--bone-faint); line-height: 1.4; }
+.gg-relic li .m { color: var(--seal); font-family: var(--font-mono); flex-shrink: 0; }
+.gg-relic-demo { background: var(--ink-2); border: 1px solid var(--seal-deep); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--glow-seal); }
+.gg-relic-img { aspect-ratio: 1/1; position: relative; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--line-1); }
+.gg-relic-img .cap { position: relative; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--bone-ghost); }
+.gg-relic-msg { padding: 16px; }
+.gg-relic-msg .lbl { font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--seal); }
+.gg-relic-msg p { margin: 8px 0 0; font-family: var(--font-display); font-style: italic; font-size: 17px; line-height: 1.35; color: var(--bone); }
+.gg-relic-msg .meta { margin-top: 12px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; color: var(--bone-ghost); display: flex; gap: 12px; flex-wrap: wrap; }
+
+/* ---- Prophets ---- */
+.gg-prophets { padding: 36px 40px; }
+.gg-prophets-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px 28px; margin-top: 20px; }
+.gg-prophet-item { display: flex; gap: 12px; align-items: flex-start; }
+.gg-prophet-item .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--seal); margin-top: 7px; flex-shrink: 0; box-shadow: 0 0 8px 0 var(--seal-glow); }
+.gg-prophet-item p { margin: 0; font-size: 16px; line-height: 1.45; color: var(--bone-dim); }
+
+/* ---- Economy statement ---- */
+.gg-economy { padding: 44px 40px; position: relative; overflow: hidden; }
+.gg-economy .big { font-family: var(--font-display); font-weight: 500; font-size: clamp(28px, 4.6vw, 44px); line-height: 1.15; letter-spacing: -0.01em; color: var(--bone); margin: 0; text-wrap: balance; }
+.gg-economy .big em { color: var(--ember); font-style: italic; }
+.gg-economy .ledger { margin: 26px 0 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line-1); border: 1px solid var(--line-2); border-radius: var(--radius-md); overflow: hidden; }
+.gg-economy .ledger > div { background: var(--ink-1); padding: 18px 20px; }
+.gg-economy .ledger .k { font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ember); }
+.gg-economy .ledger .v { margin-top: 8px; font-family: var(--font-display); font-size: 19px; color: var(--bone); line-height: 1.2; }
+.gg-economy .dual { margin-top: 26px; display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); }
+.gg-economy .dual blockquote { margin: 0; padding-left: 18px; border-left: 2px solid var(--line-3); }
+.gg-economy .dual .who { font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--bone-faint); }
+.gg-economy .dual .line { margin-top: 8px; font-family: var(--font-display); font-style: italic; font-size: 18px; line-height: 1.35; color: var(--bone-dim); }
+
+/* ---- Offerings / market (cautious) ---- */
+.gg-offerings ul { margin: 16px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 11px; }
+.gg-offerings li { display: flex; gap: 12px; font-size: 15px; line-height: 1.5; color: var(--bone-dim); }
+.gg-offerings li .m { color: var(--seal); font-family: var(--font-mono); font-weight: 700; flex-shrink: 0; }
+
+/* Support the Trial sub-block (donation ≠ offering) */
+.gg-support { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--line-2); scroll-margin-top: 80px; }
+.gg-support-head { display: flex; align-items: center; gap: 12px; }
+.gg-support-tag { margin-left: auto; font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--bone-faint); border: 1px solid var(--line-2); border-radius: var(--radius-xs); padding: 4px 8px; }
+.gg-support-body { margin: 12px 0 0; font-size: 16px; line-height: 1.55; color: var(--bone-dim); max-width: 64ch; }
+.gg-support-actions { margin-top: 18px; display: flex; gap: 12px; flex-wrap: wrap; }
+.gg-support-soon { margin: 12px 0 0; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--bone-ghost); }
+.gg-support-notes { margin: 18px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.gg-support-notes li { font-size: 14px; line-height: 1.5; color: var(--bone-faint); padding-left: 14px; position: relative; }
+.gg-support-notes li::before { content: "·"; position: absolute; left: 0; color: var(--seal); }
+.gg-support-notes strong { color: var(--bone); font-weight: 600; }
+
+/* disclaimer ribbon */
+.gg-disclaimer { border: 1px solid var(--line-2); border-radius: var(--radius-md); background: var(--ink-1); padding: 18px 22px; display: flex; gap: 14px; align-items: flex-start; }
+.gg-disclaimer .mark { font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ember); flex-shrink: 0; padding-top: 2px; }
+.gg-disclaimer p { margin: 0; font-size: 14px; line-height: 1.55; color: var(--bone-faint); font-style: italic; font-family: var(--font-body); }
+
+@media (max-width: 900px) {
+  .gg-day-steps { grid-template-columns: 1fr 1fr; }
+  .gg-grid-3, .gg-ways { grid-template-columns: 1fr; }
+  .gg-trial-steps { grid-template-columns: 1fr; }
+  .gg-relic { grid-template-columns: 1fr; gap: var(--space-5); }
+  .gg-prophets-grid { grid-template-columns: 1fr; }
+  .gg-economy .ledger { grid-template-columns: 1fr 1fr; }
+  .gg-economy .dual { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .gg-dual, .gg-trace-judge, .gg-day-steps { grid-template-columns: 1fr; }
+  .gg-archive-row { grid-template-columns: 48px 1fr; }
+  .gg-archive-row .tallies { grid-column: 1 / -1; }
+}

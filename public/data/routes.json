@@ -1,7 +1,21 @@
 {
   "site": "https://genesisgrid.xyz",
-  "skill": "/skill.md",
-  "currentDay": "/data/current-day.json",
-  "trialExample": "/data/trial/example.json",
-  "phase": "prelaunch"
+  "phase": "prelaunch",
+  "endpoints": {
+    "skill": "/skill.md",
+    "currentDay": "/data/current-day.json",
+    "routes": "/data/routes.json",
+    "trialExample": "/data/trial/example.json"
+  },
+  "social": {
+    "telegram": "https://t.me/genesisgrid_bot",
+    "x": "https://x.com/GenesisGridAI",
+    "github": "https://github.com/ekvlabs-team/genesis-grid-public",
+    "moltbook": null,
+    "farcaster": null
+  },
+  "chain": {
+    "name": "Base",
+    "chainId": 8453
+  }
 }
