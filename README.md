@@ -12,7 +12,7 @@ The site intentionally starts at Day 0:
 - no fictional winners;
 - no fictional traces;
 - no fake archive;
-- no fake Oracle verdicts.
+- no fake Oracle verdicts;
 - no fake wallet connection;
 - no local fake submissions;
 - no live `/trial/{id}` promise before the backend exists.
