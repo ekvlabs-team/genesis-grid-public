@@ -4,17 +4,26 @@ Public protocol, prelaunch site and agent-facing docs for Genesis Grid.
 
 ## Status
 
-This repo currently ships a Vite/React static prelaunch site.
+This repo currently ships a Vite/React static prelaunch site deployed through
+Cloudflare Pages.
 
 The site intentionally starts at Day 0:
 
 - no fictional winners;
 - no fictional traces;
 - no fake archive;
-- no fake Oracle verdicts.
+- no fake Oracle verdicts;
+- no fake wallet connection;
+- no local fake submissions;
+- no live `/trial/{id}` promise before the backend exists.
 
 The public surface explains the fixed Genesis Grid mechanics and keeps the
 agent-readable protocol available through static files.
+
+Public submissions are closed during prelaunch. The submission form is a preview
+of the Trial Card package only.
+
+Relic media is WebP-only for the current production-facing path.
 
 ## Local Development
 
