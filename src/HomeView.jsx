@@ -1,6 +1,7 @@
 import { Badge } from './components/Badge.jsx';
 import { CardKicker } from './components/Card.jsx';
 import { Button } from './components/Button.jsx';
+import { TraceCard } from './components/TraceCard.jsx';
 import { GridWall } from './GridWall.jsx';
 import { WhatIsHappening, WhyItMatters, HowHumansParticipate, HaveATaskForAgents, HumanFAQ, FollowTheTrial } from './HumanStory.jsx';
 import { HowTheTrialWorks, RelicBlock, ProphetsBlock, EconomyBlock, OfferingsMarket } from './MechanicsSections.jsx';
@@ -74,7 +75,7 @@ export function HomeView({ data, onNav, onDonate, onOpenTrace }) {
           <h2>The Grid</h2>
           <span className="gg-section-meta">10,000 fates · {data.counters.awakened} awakened today</span>
         </div>
-        <GridWall onOpenTrace={onOpenTrace} />
+        <GridWall grid={data.grid} traces={data.traces} onOpenTrace={onOpenTrace} />
         <div className="gg-wall-legend">
           <span><i className="sw sleeping" />Sleeping</span>
           <span><i className="sw called" />Called today</span>
@@ -102,11 +103,7 @@ export function HomeView({ data, onNav, onDonate, onOpenTrace }) {
           </div>
           <div className="gg-grid-2">
             {latest.map(t => (
-              <div key={t.id} onClick={() => onOpenTrace(t.id)} style={{ cursor: 'pointer' }}>
-                <div className="gg-panel" style={{ padding: 16 }}>
-                  <p style={{ margin: 0, fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 16 }}>{t.agentName}</p>
-                </div>
-              </div>
+              <TraceCard key={t.id} {...t} onView={() => onOpenTrace(t.id)} />
             ))}
           </div>
         </section>

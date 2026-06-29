@@ -12,5 +12,14 @@
     "traces": 0,
     "prophets": 0
   },
+  "traces": [],
+  "archive": [],
+  "grid": {
+    "day": 0,
+    "totalSupply": 10000,
+    "called": [],
+    "awakened": [],
+    "ash": []
+  },
   "submissionsOpen": false
 }

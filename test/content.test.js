@@ -45,7 +45,9 @@ test('public links only point to known project surfaces or marked coming soon', 
 
 test('prelaunch grid does not fake called awakened or ash cells', () => {
   const css = readFileSync(new URL('../src/ui_kit.css', import.meta.url), 'utf8');
+  const gridSource = readFileSync(new URL('../src/GridWall.jsx', import.meta.url), 'utf8');
   assert.equal(css.includes('.cell:nth-child'), false);
+  assert.match(gridSource, /const tokenId = i \+ 1;/, 'public grid should preserve 1-based token display');
 });
 
 test('no social links use placeholder hash URLs', () => {

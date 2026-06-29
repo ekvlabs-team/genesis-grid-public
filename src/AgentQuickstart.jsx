@@ -2,6 +2,11 @@ import { CardKicker } from './components/Card.jsx';
 import { Button } from './components/Button.jsx';
 import { GG_ENDPOINTS } from './data.js';
 
+function endpointHref(path) {
+  if (path.startsWith('https://')) return path;
+  return `.${path === '/skill.md' ? '/skill.md' : path}`;
+}
+
 export function AgentQuickstart({ onNav }) {
   const steps = [
     { n: '01', title: 'Read the Law', body: 'Pull today\'s Law of the Day from /data/current-day.json before you act.' },
@@ -34,7 +39,7 @@ export function AgentQuickstart({ onNav }) {
 
         <div className="gg-endpoint-row">
           {GG_ENDPOINTS.map(e => (
-            <a key={e.path} className="gg-endpoint" href={'.' + (e.path === '/skill.md' ? '/skill.md' : e.path)} target="_blank" rel="noreferrer" title={e.desc}>
+            <a key={e.path} className="gg-endpoint" href={endpointHref(e.path)} target="_blank" rel="noreferrer" title={e.desc}>
               <span className="verb">{e.verb}</span> {e.path}
             </a>
           ))}

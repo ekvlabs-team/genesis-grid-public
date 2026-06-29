@@ -1,18 +1,57 @@
-import React, { useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 
-// Prelaunch: all 10,000 cells are sleeping (void state). No PRNG fake activity.
-const GG_CELL_NODES = Array.from({ length: 10000 }, (_, i) =>
-  React.createElement('i', {
-    key: i,
-    className: 'gg-cell void',
-    'data-id': i + 1,
-    'data-state': 'void',
-  })
-);
+const DEFAULT_TOTAL_SUPPLY = 10000;
 
-export function GridWall({ onOpenTrace }) {
+function tokenSet(values) {
+  const ids = [];
+  for (const value of Array.isArray(values) ? values : []) {
+    if (value === null || value === undefined || value === '') continue;
+    const id = Number(value);
+    if (Number.isFinite(id)) ids.push(id);
+  }
+  return new Set(ids);
+}
+
+function traceMap(traces) {
+  const byToken = new Map();
+  for (const trace of Array.isArray(traces) ? traces : []) {
+    const tokenId = Number(trace.tokenId);
+    if (Number.isFinite(tokenId)) byToken.set(tokenId, trace.id);
+  }
+  return byToken;
+}
+
+function cellState(tokenId, sets) {
+  if (sets.awakened.has(tokenId)) return 'awakened';
+  if (sets.ash.has(tokenId)) return 'ash';
+  if (sets.called.has(tokenId)) return 'called';
+  return 'void';
+}
+
+export function GridWall({ grid, traces, onOpenTrace }) {
   const tipRef = useRef(null);
   const wrapRef = useRef(null);
+  const traceByToken = useMemo(() => traceMap(traces), [traces]);
+  const cells = useMemo(() => {
+    const total = Math.max(1, Math.min(Number(grid?.totalSupply) || DEFAULT_TOTAL_SUPPLY, DEFAULT_TOTAL_SUPPLY));
+    const sets = {
+      called: tokenSet(grid?.called),
+      awakened: tokenSet(grid?.awakened),
+      ash: tokenSet(grid?.ash),
+    };
+    return Array.from({ length: total }, (_, i) => {
+      const tokenId = i + 1;
+      const state = cellState(tokenId, sets);
+      const traceId = traceByToken.get(tokenId);
+      return React.createElement('i', {
+        key: tokenId,
+        className: `gg-cell ${state}`,
+        'data-id': tokenId,
+        'data-state': state,
+        'data-trace-id': traceId || '',
+      });
+    });
+  }, [grid, traceByToken]);
 
   const onMove = (e) => {
     const cell = e.target.closest('.gg-cell');
@@ -33,7 +72,9 @@ export function GridWall({ onOpenTrace }) {
 
   const onClick = (e) => {
     const cell = e.target.closest('.gg-cell');
-    if (cell && cell.getAttribute('data-state') === 'awakened') onOpenTrace && onOpenTrace();
+    if (cell && cell.getAttribute('data-state') === 'awakened') {
+      onOpenTrace && onOpenTrace(cell.getAttribute('data-trace-id') || undefined);
+    }
   };
 
   return (
@@ -44,7 +85,7 @@ export function GridWall({ onOpenTrace }) {
         onMouseLeave={() => { if (tipRef.current) tipRef.current.style.opacity = '0'; }}
         onClick={onClick}
       >
-        {GG_CELL_NODES}
+        {cells}
       </div>
       <span className="gg-wall-tip" ref={tipRef} />
     </div>

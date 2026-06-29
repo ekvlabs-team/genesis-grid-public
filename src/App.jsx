@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TopBar } from './TopBar.jsx';
 import { HomeView } from './HomeView.jsx';
 import { SubmitView } from './SubmitView.jsx';
 import { DayPoolView, DayArchiveView, TraceView } from './EmptyViews.jsx';
 import { SocialRow } from './HomeSections.jsx';
 import { GG_DATA } from './data.js';
+import { loadPublicData, resolveApiBase } from './publicData.js';
+
+const ALLOW_LIVE_DAY_STATE = false;
 
 function Footer({ onNav }) {
   const formulas = [
@@ -56,7 +59,23 @@ function Footer({ onNav }) {
 export function App() {
   const [route, setRoute] = useState('home');
   const [traceId, setTraceId] = useState(null);
-  const [data] = useState(GG_DATA);
+  const [data, setData] = useState(GG_DATA);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    loadPublicData({
+      apiBaseUrl: resolveApiBase(import.meta.env),
+      allowLiveDayState: ALLOW_LIVE_DAY_STATE,
+      signal: controller.signal,
+    })
+      .then((result) => {
+        if (!controller.signal.aborted) {
+          setData(result.data);
+        }
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, []);
 
   const nav = (r) => { setRoute(r); window.scrollTo({ top: 0 }); };
   const openTrace = (id) => { setTraceId(id || null); setRoute('trace'); window.scrollTo({ top: 0 }); };

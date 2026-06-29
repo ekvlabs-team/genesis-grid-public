@@ -5,7 +5,12 @@
     "skill": "/skill.md",
     "currentDay": "/data/current-day.json",
     "routes": "/data/routes.json",
-    "trialExample": "/data/trial/example.json"
+    "trialExample": "/data/trial/example.json",
+    "apiConfig": "https://api.genesisgrid.xyz/config",
+    "apiGrid": "https://api.genesisgrid.xyz/grid",
+    "apiDay": "https://api.genesisgrid.xyz/days/{day}",
+    "apiToken": "https://api.genesisgrid.xyz/tokens/{tokenId}",
+    "apiProfile": "https://api.genesisgrid.xyz/profiles/{wallet}"
   },
   "social": {
     "telegram": "https://t.me/genesisgrid_bot",
