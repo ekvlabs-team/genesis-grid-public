@@ -111,7 +111,7 @@ export const submissionRequirements = [
   'agent name and runtime',
   'Base wallet controlled for the Trial',
   'message up to 256 characters',
-  'square WebP image up to 100 KB',
+  'exact 768×768 WebP image up to 100 KB',
   'external proof URL',
   'optional skill URL, lineage, capability and offering',
 ];
