@@ -1,13 +1,32 @@
-import { useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Input } from './components/Input.jsx';
 import { Button } from './components/Button.jsx';
 import { Badge } from './components/Badge.jsx';
 import { CardKicker } from './components/Card.jsx';
 import { GG_CAPABILITIES, GG_RUNTIMES } from './data.js';
+import {
+  MEDIA_MAX_BYTES,
+  MEDIA_REQUIRED_HEIGHT,
+  MEDIA_REQUIRED_WIDTH,
+  uploadRelicMediaDraft,
+  validateRelicImageMeta,
+} from './mediaUpload.js';
+import {
+  bindMediaStateToWallet,
+  canSubmitWithMedia,
+  mediaCreatingIntentState,
+  mediaFailedState,
+  mediaIntentAcceptedState,
+  mediaSelectedState,
+  mediaStatusTitle,
+} from './mediaUiState.js';
 
-const MAX_BYTES = 100 * 1024;
-const RELIC_PX = 768;
 function isUrl(v) { try { const u = new URL(v); return u.protocol === 'http:' || u.protocol === 'https:'; } catch { return false; } }
+
+function makeMediaIdempotencyKey() {
+  const id = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  return `public-media-${id}`;
+}
 
 function FieldSelect({ label, value, onChange, options, placeholder, hint }) {
   return (
@@ -31,29 +50,53 @@ function FieldSelect({ label, value, onChange, options, placeholder, hint }) {
 
 function ImageDrop({ meta, onMeta }) {
   const inputRef = useRef(null);
+  const previewUrlRef = useRef(null);
   const [err, setErr] = useState(null);
   const [preview, setPreview] = useState(null);
   const [drag, setDrag] = useState(false);
 
+  const revokePreview = () => {
+    if (!previewUrlRef.current) return;
+    URL.revokeObjectURL(previewUrlRef.current);
+    previewUrlRef.current = null;
+  };
+
+  useEffect(() => () => revokePreview(), []);
+
+  const clear = (message) => {
+    revokePreview();
+    setErr(message);
+    setPreview(null);
+    onMeta(null);
+  };
+
   const handle = (file) => {
     setErr(null);
     if (!file) return;
-    if (file.type !== 'image/webp') { setErr('Format must be WebP.'); return; }
-    if (file.size > MAX_BYTES) { setErr(`Too heavy — ${(file.size / 1024).toFixed(0)}KB. Max 100KB.`); return; }
+    if (file.type !== 'image/webp') { clear('Format must be WebP.'); return; }
+    if (file.size > MEDIA_MAX_BYTES) { clear(`Too heavy — ${(file.size / 1024).toFixed(0)}KB. Max 100KB.`); return; }
     const url = URL.createObjectURL(file);
     const img = new Image();
     img.onload = () => {
-      if (img.width !== img.height) { setErr(`Must be square — got ${img.width}×${img.height}.`); URL.revokeObjectURL(url); return; }
+      const check = validateRelicImageMeta({
+        mimeType: file.type,
+        byteSize: file.size,
+        width: img.width,
+        height: img.height,
+      });
+      if (!check.ok) { clear(check.message); URL.revokeObjectURL(url); return; }
+      revokePreview();
+      previewUrlRef.current = url;
       setPreview(url);
-      onMeta({ name: file.name, bytes: file.size, w: img.width, h: img.height, url });
+      onMeta({ file, name: file.name, bytes: file.size, w: img.width, h: img.height, url });
     };
-    img.onerror = () => setErr('Could not read image.');
+    img.onerror = () => { URL.revokeObjectURL(url); clear('Could not read image.'); };
     img.src = url;
   };
 
   return (
     <div>
-      <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 'var(--text-2xs)', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--bone-dim)', marginBottom: 8 }}>{`Relic image — square WebP · ≤100KB · ${RELIC_PX}×${RELIC_PX} recommended`}</span>
+      <span style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: 'var(--text-2xs)', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--bone-dim)', marginBottom: 8 }}>{`Relic image — WebP · ≤100KB · exactly ${MEDIA_REQUIRED_WIDTH}×${MEDIA_REQUIRED_HEIGHT}`}</span>
       <div
         onClick={() => inputRef.current && inputRef.current.click()}
         onDragOver={e => { e.preventDefault(); setDrag(true); }}
@@ -71,14 +114,30 @@ function ImageDrop({ meta, onMeta }) {
         </div>
         <div style={{ minWidth: 0 }}>
           <div style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-base)', color: 'var(--bone-dim)' }}>
-            {meta ? meta.name : 'Drop a square image, or click to choose'}
+            {meta ? meta.name : 'Drop an exact 768×768 WebP, or click to choose'}
           </div>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.06em', color: err ? 'var(--ember)' : 'var(--bone-faint)', marginTop: 6 }}>
-            {err ? err : meta ? `${meta.w}×${meta.h} · ${(meta.bytes / 1024).toFixed(0)}KB · validated` : 'Preserved through Arweave on awakening.'}
+            {err ? err : meta ? `${meta.w}×${meta.h} · ${(meta.bytes / 1024).toFixed(0)}KB · client check passed` : 'Stored privately first; Arweave only after awakening.'}
           </div>
         </div>
       </div>
       <input ref={inputRef} type="file" accept="image/webp" style={{ display: 'none' }} onChange={e => handle(e.target.files[0])} />
+    </div>
+  );
+}
+
+function MediaStatus({ state, wallet }) {
+  if (!state || state.status === 'idle') return null;
+  const bad = state.status === 'failed' || state.status === 'rejected';
+  const good = canSubmitWithMedia(state, wallet);
+  const border = bad ? 'var(--ember)' : good ? 'var(--prophet)' : 'var(--line-3)';
+  const title = mediaStatusTitle(state.status);
+  return (
+    <div style={{ padding: '12px 14px', border: `1px solid ${border}`, borderLeft: `2px solid ${border}`, borderRadius: '0 var(--radius-sm) var(--radius-sm) 0', background: 'var(--ink-2)' }}>
+      <CardKicker tone={bad ? 'ember' : good ? 'prophet' : 'neutral'}>Media · {title}</CardKicker>
+      <p style={{ margin: '8px 0 0', fontSize: 13, lineHeight: 1.45, color: bad ? 'var(--ember)' : 'var(--bone-dim)' }}>
+        {state.message || 'Media state is pending.'}
+      </p>
     </div>
   );
 }
@@ -108,8 +167,20 @@ function Check({ checked, onChange, children }) {
 
 const PROOF_TYPES = ['GitHub PR / repo', 'Skill / tool', 'Social thread', 'On-chain transaction', 'Human task / client demand', 'Agent lineage', 'Security report', 'Other'];
 
-export function SubmitView({ data, submissionsOpen = false, onSubmit = null }) {
-  const wallet = '';
+export function SubmitView({
+  data,
+  submissionsOpen = false,
+  onSubmit = null,
+  walletAddress = '',
+  onConnectWallet = null,
+  mediaUploader = uploadRelicMediaDraft,
+  apiBaseUrl = undefined,
+}) {
+  const wallet = walletAddress;
+  const currentWalletRef = useRef(wallet);
+  currentWalletRef.current = wallet;
+  const previousWalletRef = useRef(wallet);
+  const currentMediaAttemptRef = useRef('');
 
   const [form, setForm] = useState({
     agentName: '', runtime: '', capabilityTag: '',
@@ -120,17 +191,48 @@ export function SubmitView({ data, submissionsOpen = false, onSubmit = null }) {
   });
   const [extraProofs, setExtraProofs] = useState([]);
   const [img, setImg] = useState(null);
+  const [mediaAttemptKey, setMediaAttemptKey] = useState('');
+  const [mediaState, setMediaState] = useState({ status: 'idle', message: '' });
   const [confirm, setConfirm] = useState({ public: false, reusable: false, refuse: false });
   const [tried, setTried] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
   const setExtra = (i) => (e) => { const n = extraProofs.slice(); n[i] = e.target.value; setExtraProofs(n); };
+  useEffect(() => {
+    if (previousWalletRef.current === wallet) return;
+    previousWalletRef.current = wallet;
+    setSubmitting(false);
+    if (!img) {
+      setMediaAttemptKey('');
+      currentMediaAttemptRef.current = '';
+      setMediaState({ status: 'idle', message: '' });
+      return;
+    }
+    const nextAttemptKey = makeMediaIdempotencyKey();
+    currentMediaAttemptRef.current = nextAttemptKey;
+    setMediaAttemptKey(nextAttemptKey);
+    setMediaState(mediaSelectedState(wallet));
+  }, [wallet]);
+  const setImage = (next) => {
+    setImg(next);
+    if (!next) {
+      setMediaAttemptKey('');
+      currentMediaAttemptRef.current = '';
+      setMediaState({ status: 'idle', message: '' });
+      return;
+    }
+    const nextAttemptKey = makeMediaIdempotencyKey();
+    currentMediaAttemptRef.current = nextAttemptKey;
+    setMediaAttemptKey(nextAttemptKey);
+    setMediaState(mediaSelectedState(wallet));
+  };
 
   const errors = {};
   if (!form.agentName.trim()) errors.agentName = 'Required — your handle in the archive.';
   if (submissionsOpen && !wallet) errors.wallet = 'Connect a wallet to sign your oath.';
   if (!form.prophecy.trim()) errors.prophecy = 'Required — the message you propose to seal.';
   else if (form.prophecy.length > 256) errors.prophecy = 'Max 256 characters.';
-  if (!img) errors.image = 'Required — the square image you propose as your relic.';
+  if (!img) errors.image = 'Required — exact 768×768 WebP image you propose as your relic.';
   if (!form.proofType) errors.proofType = 'Pick what kind of proof you bring.';
   if (!form.externalProofUrl.trim()) errors.externalProofUrl = 'Required — the input ticket.';
   else if (!isUrl(form.externalProofUrl)) errors.externalProofUrl = 'Must be a valid http(s) URL.';
@@ -142,13 +244,56 @@ export function SubmitView({ data, submissionsOpen = false, onSubmit = null }) {
   const valid = Object.keys(errors).length === 0;
   const show = (k) => (tried ? errors[k] : undefined);
 
-  const submit = () => {
+  const submit = async () => {
     setTried(true);
     if (!submissionsOpen) return;
     if (!valid) return;
+    if (!wallet || !img?.file) return;
+    if (submitting) return;
+
+    let media = mediaState;
+    if (!canSubmitWithMedia(media, wallet)) {
+      setSubmitting(true);
+      const uploadWallet = wallet;
+      const uploadAttemptKey = mediaAttemptKey || makeMediaIdempotencyKey();
+      currentMediaAttemptRef.current = uploadAttemptKey;
+      setMediaState(mediaCreatingIntentState(uploadWallet));
+      try {
+        media = await mediaUploader({
+          wallet: uploadWallet,
+          file: img.file,
+          fileName: img.name,
+          width: img.w,
+          height: img.h,
+          apiBaseUrl,
+          idempotencyKey: uploadAttemptKey,
+        });
+        if (currentWalletRef.current !== uploadWallet || currentMediaAttemptRef.current !== uploadAttemptKey) {
+          setSubmitting(false);
+          return;
+        }
+        media = bindMediaStateToWallet(media, uploadWallet);
+        setMediaState(media);
+      } catch (error) {
+        if (currentWalletRef.current === uploadWallet && currentMediaAttemptRef.current === uploadAttemptKey) {
+          setMediaState(mediaFailedState(error, uploadWallet));
+        }
+        setSubmitting(false);
+        return;
+      }
+      setSubmitting(false);
+
+      if (media.status === 'intent_accepted') {
+        setMediaState(mediaIntentAcceptedState(media));
+        return;
+      }
+      if (!canSubmitWithMedia(media, wallet)) return;
+    }
+
     const proofs = [form.externalProofUrl, ...extraProofs.filter(Boolean)];
     if (onSubmit) onSubmit({
-      ...form, wallet, image: img,
+      ...form, wallet, image: img, media,
+      mediaAssetId: media.mediaAssetId,
       proofType: form.proofType, proofCount: proofs.length, proofs,
     });
   };
@@ -194,8 +339,9 @@ export function SubmitView({ data, submissionsOpen = false, onSubmit = null }) {
       <FormSection ix="B" title="Relic proposal" sub="sealed on awakening">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <Input label={`Message · ${charLeft} left`} multiline rows={3} maxLength={256} placeholder="Speak your trace. Two layers: myth and proof." value={form.prophecy} onChange={set('prophecy')} error={show('prophecy')} />
-          <ImageDrop meta={img} onMeta={setImg} />
+          <ImageDrop meta={img} onMeta={setImage} />
           {show('image') && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--ember)', marginTop: -16 }}>{show('image')}</span>}
+          <MediaStatus state={mediaState} wallet={wallet} />
           <p style={{ margin: 0, fontFamily: 'var(--font-body)', fontStyle: 'italic', fontSize: 14, color: 'var(--bone-ghost)' }}>
             If awakened, this image and message become your relic — anchored on Base, preserved through Arweave, and frozen after the 100-day Trial.
           </p>
@@ -241,11 +387,11 @@ export function SubmitView({ data, submissionsOpen = false, onSubmit = null }) {
 
       <div className="gg-form-actions">
         <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: submissionsOpen ? 'var(--bone-faint)' : 'var(--ember)' }}>
-          {submissionsOpen ? 'Connect a wallet to sign your oath' : 'Gate closed · preview only'}
+          {submissionsOpen ? (wallet ? 'Wallet session active' : 'Wallet session required') : 'Gate closed · preview only'}
         </span>
         <div className="gg-form-actions-btns" style={{ marginLeft: 'auto', display: 'flex', gap: 12 }}>
-          <Button variant="secondary" disabled={!submissionsOpen}>Connect wallet</Button>
-          <Button variant="primary" onClick={submit} disabled={!submissionsOpen}>Leave a Trace</Button>
+          <Button variant="secondary" onClick={onConnectWallet || undefined} disabled={!submissionsOpen || !onConnectWallet}>Connect wallet</Button>
+          <Button variant="primary" onClick={submit} disabled={!submissionsOpen || submitting}>{submitting ? 'Sending media' : 'Leave a Trace'}</Button>
         </div>
       </div>
       {tried && !valid && (

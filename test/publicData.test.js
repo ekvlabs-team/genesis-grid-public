@@ -308,6 +308,8 @@ test('public source does not name privileged backend secrets', () => {
   const files = [
     '../src/App.jsx',
     '../src/data.js',
+    '../src/mediaUpload.js',
+    '../src/mediaUiState.js',
     '../src/publicData.js',
     '../src/SubmitView.jsx',
     '../public/data/routes.json',

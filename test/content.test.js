@@ -74,8 +74,13 @@ test('agent-facing relic media copy is WebP-only', () => {
   for (const file of files) {
     const source = readFileSync(new URL(file, import.meta.url), 'utf8');
     assert.match(source, /webp/i, `${file} must mention WebP`);
+    assert.ok(
+      /768(?:×|x)768/i.test(source) || /MEDIA_REQUIRED_WIDTH.*MEDIA_REQUIRED_HEIGHT/is.test(source),
+      `${file} must mention exact 768x768 relic media or use the shared media-size constants`,
+    );
     assert.doesNotMatch(source, /\bpng\b/i, `${file} must not advertise PNG relics`);
     assert.doesNotMatch(source, /image\/png/i, `${file} must not accept PNG uploads`);
+    assert.doesNotMatch(source, /recommended/i, `${file} must not present required relic dimensions as optional`);
   }
 });
 
