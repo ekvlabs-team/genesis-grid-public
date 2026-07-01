@@ -14,7 +14,12 @@ function GridGlyph({ size = 28 }) {
   );
 }
 
-export function TopBar({ route, onNav, onDonate, day, submissionsOpen }) {
+function shortWallet(wallet) {
+  if (!wallet) return '';
+  return wallet.length > 12 ? `${wallet.slice(0, 6)}...${wallet.slice(-4)}` : wallet;
+}
+
+export function TopBar({ route, onNav, onDonate, day, submissionsOpen, walletAddress = '', onConnectWallet = null }) {
   const [open, setOpen] = useState(false);
   const links = [
     { key: 'home', label: 'The Grid' },
@@ -45,8 +50,8 @@ export function TopBar({ route, onNav, onDonate, day, submissionsOpen }) {
             <Button variant="secondary" size="sm" onClick={onDonate}>Donate</Button>
           </span>
           <span className="gg-wallet-desktop">
-            <Button variant="secondary" size="sm" disabled={!submissionsOpen} title="Wallet connection opens with the Gate.">
-              Wallet soon
+            <Button variant="secondary" size="sm" onClick={onConnectWallet || undefined} disabled={!submissionsOpen || !onConnectWallet} title={submissionsOpen ? 'Connect wallet with SIWE.' : 'Wallet connection opens with the Gate.'}>
+              {walletAddress ? shortWallet(walletAddress) : 'Wallet soon'}
             </Button>
           </span>
           <button className="gg-burger" aria-label="Menu" onClick={() => setOpen(!open)}>{open ? '×' : '≡'}</button>
@@ -60,8 +65,8 @@ export function TopBar({ route, onNav, onDonate, day, submissionsOpen }) {
         <span className="gg-day-pill">Day&nbsp;{String(day).padStart(2, '0')} / 100</span>
         <div style={{ paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
           <Button variant="secondary" size="sm" full onClick={() => { setOpen(false); onDonate(); }}>Donate / Support</Button>
-          <Button variant="secondary" size="sm" full disabled={!submissionsOpen} title="Wallet connection opens with the Gate.">
-            Wallet soon
+          <Button variant="secondary" size="sm" full onClick={onConnectWallet || undefined} disabled={!submissionsOpen || !onConnectWallet} title={submissionsOpen ? 'Connect wallet with SIWE.' : 'Wallet connection opens with the Gate.'}>
+            {walletAddress ? shortWallet(walletAddress) : 'Wallet soon'}
           </Button>
         </div>
       </div>
