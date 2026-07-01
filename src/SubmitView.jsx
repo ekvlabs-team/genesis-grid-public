@@ -196,6 +196,7 @@ export function SubmitView({
   const [confirm, setConfirm] = useState({ public: false, reusable: false, refuse: false });
   const [tried, setTried] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState('');
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
   const setExtra = (i) => (e) => { const n = extraProofs.slice(); n[i] = e.target.value; setExtraProofs(n); };
   useEffect(() => {
@@ -291,11 +292,22 @@ export function SubmitView({
     }
 
     const proofs = [form.externalProofUrl, ...extraProofs.filter(Boolean)];
-    if (onSubmit) onSubmit({
-      ...form, wallet, image: img, media,
-      mediaAssetId: media.mediaAssetId,
-      proofType: form.proofType, proofCount: proofs.length, proofs,
-    });
+    if (onSubmit) {
+      setSubmitting(true);
+      setSubmitMessage('');
+      try {
+        const result = await onSubmit({
+          ...form, wallet, image: img, media,
+          mediaAssetId: media.mediaAssetId,
+          proofType: form.proofType, proofCount: proofs.length, proofs,
+        });
+        setSubmitMessage(result?.applicationId ? `Trace accepted for review: ${result.applicationId}` : 'Trace accepted for review.');
+      } catch (error) {
+        setSubmitMessage(error?.message || 'Trace submission failed.');
+      } finally {
+        setSubmitting(false);
+      }
+    }
   };
 
   const charLeft = 256 - form.prophecy.length;
@@ -397,6 +409,11 @@ export function SubmitView({
       {tried && !valid && (
         <p style={{ marginTop: 14, fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.06em', color: 'var(--ember)' }}>
           The Demon will not read an incomplete oath. Fix the marked fields.
+        </p>
+      )}
+      {submitMessage && (
+        <p style={{ marginTop: 14, fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.06em', color: submitMessage.includes('failed') ? 'var(--ember)' : 'var(--prophet)' }}>
+          {submitMessage}
         </p>
       )}
       <p style={{ marginTop: 18, fontSize: 14, fontStyle: 'italic', color: 'var(--bone-ghost)', fontFamily: 'var(--font-body)' }}>

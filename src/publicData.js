@@ -15,7 +15,7 @@ function cleanString(value, fallback = '') {
   return trimmed || fallback;
 }
 
-function safeHttpsUrl(value) {
+export function safeHttpsUrl(value) {
   const raw = cleanString(value);
   if (!raw) return '';
   try {
@@ -38,7 +38,7 @@ function safeTxHash(value) {
   return /^0x[a-f0-9]{64}$/iu.test(raw) ? raw : '';
 }
 
-function cleanInt(value, fallback = 0) {
+export function cleanInt(value, fallback = 0) {
   if (value === null || value === undefined || value === '') return fallback;
   const number = Number(value);
   if (!Number.isFinite(number)) return fallback;
@@ -72,7 +72,7 @@ function normalizeCounters(counters = {}, fallback = {}) {
   };
 }
 
-function normalizeTrace(trace, fallbackDay, fallbackEpoch) {
+export function normalizeTrace(trace, fallbackDay, fallbackEpoch) {
   if (!isObject(trace)) return null;
   const id = cleanString(trace.id ?? trace.applicationId ?? trace.application_id ?? trace.traceId);
   if (!id) return null;
@@ -106,7 +106,7 @@ function normalizeTrace(trace, fallbackDay, fallbackEpoch) {
   };
 }
 
-function normalizeArchiveEntry(entry) {
+export function normalizeArchiveEntry(entry) {
   if (!isObject(entry)) return null;
   const day = cleanInt(entry.day ?? entry.dayNumber ?? entry.day_number, -1);
   if (day < 0) return null;
@@ -122,7 +122,37 @@ function normalizeArchiveEntry(entry) {
   };
 }
 
-function normalizeGridSnapshot(snapshot = {}, fallback = {}) {
+function normalizeGridArray(rows = [], fallback = {}) {
+  const called = [];
+  const awakened = [];
+  const ash = [];
+  let maxTokenId = -1;
+
+  for (const row of rows) {
+    if (!isObject(row)) continue;
+    const tokenId = cleanInt(row.tokenId ?? row.token_id, -1);
+    if (tokenId < 0) continue;
+    maxTokenId = Math.max(maxTokenId, tokenId);
+    const status = cleanString(row.status).toLowerCase();
+    const hasDayCalled = row.dayCalled !== undefined || row.day_called !== undefined;
+    if (hasDayCalled || ['called', 'submitted', 'marked', 'awakened', 'ash'].includes(status)) {
+      called.push(tokenId);
+    }
+    if (status === 'awakened') awakened.push(tokenId);
+    if (status === 'ash') ash.push(tokenId);
+  }
+
+  return {
+    day: cleanInt(fallback.day, 0),
+    totalSupply: cleanInt(fallback.totalSupply, maxTokenId >= 0 ? maxTokenId + 1 : 10000),
+    called,
+    awakened,
+    ash,
+  };
+}
+
+export function normalizeGridSnapshot(snapshot = {}, fallback = {}) {
+  if (Array.isArray(snapshot)) return normalizeGridArray(snapshot, fallback);
   const source = isObject(snapshot) ? snapshot : {};
   return {
     day: cleanInt(source.day ?? source.dayNumber ?? source.day_number, fallback.day ?? 0),
@@ -130,6 +160,62 @@ function normalizeGridSnapshot(snapshot = {}, fallback = {}) {
     called: uniqueTokenIds(source.called ?? source.calledTokenIds ?? source.called_token_ids),
     awakened: uniqueTokenIds(source.awakened ?? source.awakenedTokenIds ?? source.awakened_token_ids),
     ash: uniqueTokenIds(source.ash ?? source.ashTokenIds ?? source.ash_token_ids),
+  };
+}
+
+export function normalizeDayRecord(record) {
+  if (!isObject(record)) return null;
+  const day = cleanInt(record.day ?? record.dayNumber ?? record.day_number, -1);
+  if (day < 1) return null;
+  const epoch = cleanString(record.epoch ?? record.epochNumber ?? record.epoch_number);
+  return {
+    day,
+    epoch,
+    mode: cleanString(record.mode),
+    law: cleanString(record.law),
+    hint: cleanString(record.hint),
+    status: cleanString(record.status, 'sealed'),
+    calledTokenIds: uniqueTokenIds(record.calledTokenIds ?? record.called_token_ids),
+    openedAt: cleanString(record.openedAt ?? record.opened_at),
+    sealedAt: cleanString(record.sealedAt ?? record.sealed_at),
+    traces: cleanArray(record.traces)
+      .map((trace) => normalizeTrace(trace, day, epoch))
+      .filter(Boolean),
+  };
+}
+
+export function normalizeTokenRecord(record) {
+  if (!isObject(record)) return null;
+  const tokenId = cleanInt(record.tokenId ?? record.token_id, -1);
+  if (tokenId < 0) return null;
+  return {
+    tokenId,
+    status: cleanString(record.status, 'shell'),
+    dayCalled: record.dayCalled ?? record.day_called ?? null,
+    applicationId: cleanString(record.applicationId ?? record.application_id),
+    ownerWallet: cleanString(record.ownerWallet ?? record.owner_wallet),
+    metadataUrl: safeHttpsUrl(record.metadataUrl ?? record.metadata_url),
+    imageUrl: safeImageUrl(record.imageUrl ?? record.image_url),
+    txHash: safeTxHash(record.txHash ?? record.tx_hash),
+  };
+}
+
+export function normalizeProfileRecord(record) {
+  if (!isObject(record)) return null;
+  const wallet = cleanString(record.wallet ?? record.walletAddress ?? record.wallet_address).toLowerCase();
+  if (!/^0x[a-f0-9]{40}$/u.test(wallet)) return null;
+  return {
+    agentId: cleanString(record.agentId ?? record.agent_id ?? record.id),
+    wallet,
+    displayName: cleanString(record.displayName ?? record.display_name, 'Agent'),
+    selfDescription: cleanString(record.selfDescription ?? record.self_description),
+    desiredMessage: cleanString(record.desiredMessage ?? record.desired_message),
+    runtime: cleanString(record.runtime),
+    capabilityTags: cleanArray(record.capabilityTags ?? record.capability_tags).map((tag) => cleanString(tag)).filter(Boolean),
+    attemptCount: cleanInt(record.attemptCount ?? record.attempt_count, 0),
+    oracleMarks: cleanInt(record.oracleMarks ?? record.oracle_marks, 0),
+    epochSeals: cleanArray(record.epochSeals ?? record.epoch_seals),
+    updatedAt: cleanString(record.updatedAt ?? record.updated_at),
   };
 }
 
@@ -271,7 +357,8 @@ export function fetchDayArchive(day, options = {}) {
 }
 
 export function fetchTokenRecord(tokenId, options = {}) {
-  const id = cleanInt(tokenId, -1);
+  const id = Number(tokenId);
+  if (!Number.isInteger(id)) throw new Error('tokenId must be a non-negative integer');
   if (id < 0) throw new Error('tokenId must be a non-negative integer');
   return fetchJson(publicApiUrl(`/tokens/${id}`, options.apiBaseUrl), options.fetchImpl ?? globalThis.fetch, options);
 }

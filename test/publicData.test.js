@@ -117,6 +117,31 @@ test('prelaunch grid snapshots are observed but not rendered as live state by de
   assert.equal(data.submissionsOpen, false);
 });
 
+test('grid snapshots tolerate the backend token-record array shape without opening prelaunch', () => {
+  const data = mergeGridSnapshot(GG_DATA, [
+    { tokenId: 0, status: 'shell' },
+    { tokenId: 7, status: 'called', dayCalled: 1 },
+    { token_id: 8, status: 'Awakened', day_called: 1 },
+    { tokenId: 9, status: 'Ash', dayCalled: 1 },
+  ]);
+
+  assert.deepEqual(data.grid.called, []);
+  assert.deepEqual(data.grid.awakened, []);
+  assert.deepEqual(data.grid.ash, []);
+  assert.equal(data.submissionsOpen, false);
+
+  const liveData = mergeGridSnapshot(GG_DATA, [
+    { tokenId: 0, status: 'shell' },
+    { tokenId: 7, status: 'called', dayCalled: 1 },
+    { token_id: 8, status: 'Awakened', day_called: 1 },
+    { tokenId: 9, status: 'Ash', dayCalled: 1 },
+  ], { allowLiveGridState: true });
+
+  assert.deepEqual(liveData.grid.called, [7, 8, 9]);
+  assert.deepEqual(liveData.grid.awakened, [8]);
+  assert.deepEqual(liveData.grid.ash, [9]);
+});
+
 test('loadPublicData falls back to embedded data when public reads fail', async () => {
   const result = await loadPublicData({
     fetchImpl: async () => new Response('not found', { status: 404 }),
@@ -284,6 +309,17 @@ test('public API read helpers use GET with omitted credentials', async () => {
     assert.equal(call.init.method, 'GET');
     assert.equal(call.init.credentials, 'omit');
   }
+});
+
+test('token read helper rejects negative ids instead of coercing them to token 0', async () => {
+  assert.throws(
+    () => fetchTokenRecord(-1, {
+      fetchImpl: async () => {
+        throw new Error('fetch should not run for an invalid token id');
+      },
+    }),
+    /tokenId must be a non-negative integer/u,
+  );
 });
 
 test('production API base rejects privileged or non-canonical browser targets', () => {
